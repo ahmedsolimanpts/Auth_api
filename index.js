@@ -8,8 +8,10 @@ var bcrypt = require('bcryptjs');
 const user = require("./Schema/user");
 require("./passport/pass");
 
-mongoose.connect(process.env.mongourl, { useNewUrlParser: true ,useUnifiedTopology: true,
-    useCreateIndex: true, }).then(console.log("connect to mongo"))
+mongoose.connect(process.env.mongourl, {
+    useNewUrlParser: true, useUnifiedTopology: true,
+    useCreateIndex: true,
+}).then(console.log("connect to mongo"))
 app.use(passport.initialize());
 app.use(passport.session());
 router.post("/signup", async (req, res) => {
@@ -22,15 +24,15 @@ router.post("/signup", async (req, res) => {
     }
     else {
         try {
-            await user.findOne({ email: email }).exec(async(err,docs) => {
+            await user.findOne({ email: email }).exec(async (err, docs) => {
                 if (docs) {
                     res.json(docs);
                 } else {
                     var salt = bcrypt.genSaltSync(10);
                     const hash = bcrypt.hashSync(password, salt);
-                    let nuser = new user( {email,password:hash} );
+                    let nuser = new user({ email, password: hash });
 
-                  await  nuser.save().catch(err => console.log(err))
+                    await nuser.save().catch(err => console.log(err))
                     res.json({ msg: "User Create Sucess" });
                 }
             });
@@ -45,31 +47,31 @@ router.post("/signup", async (req, res) => {
 });
 
 router.get("/users", (req, res) => {
-   
-    const email ='ahmeds';
-    user.findOne((err,docs)=>{
-        if(err){console.log(err)}
-        if(docs){
+
+    const email = 'ahmeds';
+    user.findOne((err, docs) => {
+        if (err) { console.log(err) }
+        if (docs) {
             res.json(docs)
         }
     })
- 
+
 })
 
-router.post('/login', function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
-      if (err) { return next(err); }
-      if (!user) { return res.json({message:info.message}) }
-      req.logIn(user, function(err) {
+router.post('/login', function (req, res, next) {
+    passport.authenticate('local', function (err, user, info) {
         if (err) { return next(err); }
-        return res.json({msg:"succes Login",user:user});
-      });
+        if (!user) { return res.json({ message: info.message }) }
+        req.logIn(user, function (err) {
+            if (err) { return next(err); }
+            return res.json({ msg: "succes Login", user: user });
+        });
     })(req, res, next);
-  });
+});
 
 app.use(router);
-app.use((req,res)=>{
-    res.status(404).json({msg:`in valid Route jsut use /signup && /login && /users to get all users `});
+app.use((req, res) => {
+    res.status(404).json({ msg: `in valid Route jsut use /signup && /login && /users to get all users ` });
 })
 app.listen(process.env.PORT, () => {
     console.log(`Server Run on Port : ${process.env.PORT}`)
