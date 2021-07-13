@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
                     let nuser = new user( {email,password:hash} );
 
                   await  nuser.save().catch(err => console.log(err))
-                    res.json({ msg: "no data" });
+                    res.json({ msg: "User Create Sucess" });
                 }
             });
         }
@@ -44,26 +44,19 @@ router.post("/signup", async (req, res) => {
 
 });
 
-router.get("/signup", (req, res) => {
-    /* bcrypt.genSalt(10, function(err, salt) {
-        bcrypt.hash("ahmed", salt, function(err, hash) {
-            
-        });
-    }); */
+router.get("/users", (req, res) => {
+   
     const email ='ahmeds';
-    user.findOne({email:email},(err,docs)=>{
-        bcrypt.compare("12345678", docs.password, function(err, result) {
-           if(result){
-               res.json(docs)
-           }else{
-            res.json({msg:"password incorect"})  
-           }
-        });
+    user.findOne((err,docs)=>{
+        if(err){console.log(err)}
+        if(docs){
+            res.json(docs)
+        }
     })
  
 })
 
-app.post('/login', function(req, res, next) {
+router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
       if (err) { return next(err); }
       if (!user) { return res.json({message:info.message}) }
@@ -73,9 +66,11 @@ app.post('/login', function(req, res, next) {
       });
     })(req, res, next);
   });
-  
-app.use(router);
 
+app.use(router);
+app.use((req,res)=>{
+    res.status(404).json({msg:`in valid Route jsut use /signup && /login && /users to get all users `});
+})
 app.listen(process.env.PORT, () => {
     console.log(`Server Run on Port : ${process.env.PORT}`)
 })
